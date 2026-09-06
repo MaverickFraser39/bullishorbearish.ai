@@ -13,7 +13,7 @@ npm run dev      # http://localhost:3000
 npm test
 ```
 
-Node 22.5+ (for `node:sqlite`). Nothing else to install, nothing to compile.
+Node 22.13+ (for unflagged `node:sqlite`). Nothing else to install, nothing to compile.
 
 To start over, delete `data/` and re-run `npm run seed`.
 

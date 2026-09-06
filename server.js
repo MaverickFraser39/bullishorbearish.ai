@@ -82,6 +82,17 @@ function present(row) {
   };
 }
 
+// Liveness probe for the platform. Touches the database so a wedged or
+// unwritable volume actually fails the check instead of reporting healthy.
+app.get('/health', (req, res) => {
+  try {
+    stats();
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(503).json({ ok: false, error: err.message });
+  }
+});
+
 app.get('/api/stats', (req, res) => res.json(stats()));
 
 app.get('/api/startups', (req, res) => {
@@ -151,7 +162,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`bullishorbearish.com listening on http://localhost:${PORT}`);
+  console.log(`bullishorbearish.ai listening on http://localhost:${PORT}`);
 });
 
 export { app, LIMITS };

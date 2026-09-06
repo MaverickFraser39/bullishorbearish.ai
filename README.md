@@ -1,4 +1,4 @@
-# bullishorbearish.com
+# bullishorbearish.ai
 
 An open board for startup sentiment. Anyone can add a private company, call it
 **bullish** or **bearish**, and — the part that actually matters — write down
@@ -20,12 +20,12 @@ The vote is the hook. The reasoning is the product.
 
 ## Quick start
 
-Needs **Node 22.5 or newer** (for the built-in `node:sqlite`). There are no
+Needs **Node 22.13 or newer** (for the built-in `node:sqlite` — 22.5 introduced it but kept it behind a flag until 22.13). There are no
 native dependencies and no build step.
 
 ```bash
-git clone https://github.com/MaverickFraser39/bullishorbearish.com.git
-cd bullishorbearish.com
+git clone https://github.com/MaverickFraser39/bullishorbearish.ai.git
+cd bullishorbearish.ai
 npm install
 npm run seed     # optional: puts a sample board in place
 npm run dev      # http://localhost:3000
@@ -105,19 +105,49 @@ Writes are rate limited per IP: 8 new companies and 60 votes an hour.
 
 ## Deploying
 
-Any host that runs Node and gives you a persistent disk. The only requirements:
-
-- Set `VOTE_SALT` and keep it stable.
-- Put `DB_PATH` on a volume that survives restarts — the SQLite file *is* the site.
-- Run behind a proxy that sets `X-Forwarded-For`; the app trusts it for rate limiting.
+Runs on [Fly.io](https://fly.io) out of the box — `Dockerfile` and `fly.toml`
+are in the repo.
 
 ```bash
-VOTE_SALT="$(node -e 'console.log(crypto.randomUUID())')" \
-DB_PATH=/var/lib/bob/board.db \
-NODE_ENV=production npm start
+fly auth login
+fly launch --no-deploy --copy-config --name bullishorbearish
+fly volumes create board_data --size 1 --region iad
+fly secrets set VOTE_SALT="$(node -e 'console.log(crypto.randomUUID())')"
+fly deploy
 ```
 
-Back up by copying the database file.
+Then point the domain at it:
+
+```bash
+fly certs add bullishorbearish.ai
+```
+
+Fly prints the A/AAAA records to add at your registrar and issues the TLS
+certificate once they resolve.
+
+### One machine, on purpose
+
+The SQLite file *is* the site, so this runs as a single instance with a single
+volume. **Do not `fly scale count` past 1.** A second machine gets its own empty
+volume and the board silently forks in two, with each half serving different
+votes. If it ever outgrows one machine, that's the point to move to
+[LiteFS](https://fly.io/docs/litefs/) or Postgres — not a scale command.
+
+For the same reason `auto_stop_machines` is off: a suspended machine is a
+down site, and the saving on a `shared-cpu-1x` isn't worth it.
+
+### Anywhere else
+
+Any host that runs Node and gives you a persistent disk works. The only
+requirements:
+
+- Set `VOTE_SALT` to a long random string and never change it — rotating it
+  lets everyone vote again.
+- Put `DB_PATH` on a volume that survives restarts.
+- Run behind a proxy that sets `X-Forwarded-For`; the app trusts it for rate
+  limiting.
+
+Back up by copying the database file: `fly ssh console -C "cat /data/board.db" > backup.db`.
 
 ## Contributing
 

@@ -1,0 +1,39 @@
+# The SQLite file IS the site, so this app is deliberately single-machine:
+# one writer, one volume. Do not scale it past one instance without moving
+# to LiteFS or Postgres first -- a second machine gets its own empty volume
+# and the board silently forks in two.
+
+app = "bullishorbearish"
+primary_region = "iad"
+
+[build]
+
+[env]
+  PORT = "8080"
+  DB_PATH = "/data/board.db"
+  NODE_ENV = "production"
+
+[mounts]
+  source = "board_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_start_machines = true
+  # Never suspend: a stopped machine means the board is down, and the
+  # savings on a machine this small are not worth the cold start.
+  auto_stop_machines = "off"
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/health"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

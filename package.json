@@ -5,9 +5,9 @@
   "type": "module",
   "description": "An open board where anyone can add a startup and call it bullish or bearish - and say why.",
   "license": "MIT",
-  "homepage": "https://bullishorbearish.com",
+  "homepage": "https://bullishorbearish.ai",
   "engines": {
-    "node": ">=22.5.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "start": "node server.js",
