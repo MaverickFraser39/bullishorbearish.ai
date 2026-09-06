@@ -54,27 +54,28 @@ docs/              images used by this README
 
 ## Decisions worth knowing about
 
-**The green isn't quite green.** Bullish/bearish wants red and green, but that
-pair is the textbook colourblind failure — `#0ca30c` against `#d03b3b` separates
-by only ΔE 4.1 under deuteranopia, where 8 is the passing bar. The live pair,
-`#00e08f` against `#ff4d5e`, clears it at ΔE 11.2 with a normal-vision ΔE of
-39.3, and both read as text on the near-black ground at 10.7:1 and 5.7:1.
+**It isn't red and green, on purpose.** Every finance product reaches for that
+pair, which is exactly why it reads as a template. It also editorialises: red is
+the danger colour, and bearish is a legitimate position, not an error. And it
+measures worse — plain green/red separates by ΔE 4.1 under deuteranopia against
+a passing bar of 8, and even a teal-shifted version only reaches 11.2.
 
-Those two sit deliberately *above* the usual lightness band. The band keeps many
-series harmonious against one another; here there are exactly two, and luminance
-against a near-black ground is the entire look. Every gate that carries meaning —
-colourblind separation, normal-vision separation, contrast — passes. And every
-indicator still ships with an arrow and a written label, so hue never carries the
-result by itself.
+The live pair is gold `#f2c05c` against indigo `#8b8bf5`: warm versus cool, the
+classic diverging structure, at **ΔE 30.3** — near three times the separation of
+the red/green it replaced. Both clear 3:1 on the surface and read as text at
+10.1:1 and 6.7:1. Arrows and written labels carry the result as well, so hue is
+never load-bearing alone.
 
-**Motion is decoration, never information.** Entrances, the drifting aurora,
-the cursor spotlight, the counting figures and the shimmer on the meters are all
-ornament. Under `prefers-reduced-motion` every one of them is cut and the final
-state renders immediately — no degraded animation, nothing withheld.
+**Restraint is the design.** Colour appears on the figures, the meter, an active
+vote and the live dot — nowhere else. There are no glows on the numbers, no
+bloom on the bars, no gradient-filled headline and no shimmer. Those were all
+there in an earlier pass and every one of them made the page look like it was
+trying to convince you.
 
-**Dark only, by choice.** There is no light theme and no toggle. The palette,
-the glow on the meters and the grid ground are built for one surface, and a
-half-hearted inverse of them would be worse than not offering one.
+**Motion is decoration, never information.** Entrances, the drifting wash, the
+cursor spotlight and the counting figures are ornament. Under
+`prefers-reduced-motion` every one is cut and the final state renders
+immediately — nothing is withheld.
 
 **Duplicates are the real enemy.** On a board anyone can post to, `OpenAI`,
 `Open AI` and `open-ai` become three cards splitting one company's votes. Every

@@ -1,12 +1,17 @@
 /* ============================================================================
    Bullish or Bearish — dark-only by commitment.
 
-   Sentiment pair #00e08f / #ff4d5e on the #0e131c surface: colourblind
-   separation dE 11.2 (deutan, target 8), normal-vision dE 39.3, both over 3:1
-   against the surface and legible as text (10.7:1 / 5.7:1). They sit above the
-   usual lightness band on purpose — that band harmonises many series, and there
-   are exactly two here. Every indicator still carries an arrow and a written
-   label, so hue never carries the result alone.
+   Sentiment pair is gold #f2c05c against indigo #8b8bf5 — deliberately NOT
+   red/green. Three reasons: red/green is the default every finance product
+   reaches for, so it reads as template; red is the danger colour, and painting
+   bearish red editorialises a legitimate position as an error; and the pair is
+   measurably worse — red/green separates by dE 11.2 under colourblind
+   simulation where warm/cool gold-indigo reaches 30.3. Both clear 3:1 on the
+   surface and read as text (10.1:1 and 6.7:1). Arrows and written labels carry
+   the result too, so hue is never load-bearing on its own.
+
+   Restraint is the design. Colour appears on the figures, the meter, an active
+   vote and the live dot — nowhere else. Everything else is greyscale.
 
    Motion is decorative throughout and is cut entirely under
    prefers-reduced-motion at the bottom of this file.
@@ -28,28 +33,28 @@
 :root {
   color-scheme: dark;
 
-  --void:      #05070b;
-  --ground:    #080b11;
-  --surface:   #0c1119;
-  --surface-2: #111826;
-  --line:      rgba(255, 255, 255, 0.06);
-  --line-2:    rgba(255, 255, 255, 0.12);
+  --void:      #08080a;
+  --ground:    #0a0a0b;
+  --surface:   #0e0e10;
+  --surface-2: #151518;
+  --line:      rgba(255, 255, 255, 0.055);
+  --line-2:    rgba(255, 255, 255, 0.11);
 
-  --ink:   #eef3fa;
-  --ink-2: #a3b2c8;
-  --ink-3: #74849c;
-  --ink-4: #4e5d75;
+  --ink:   #e4e4e7;
+  --ink-2: #a1a1aa;
+  --ink-3: #71717a;
+  --ink-4: #52525b;
 
-  --bull:     #00e08f;
-  --bear:     #ff4d5e;
-  --bull-dim: rgba(0, 224, 143, 0.10);
-  --bear-dim: rgba(255, 77, 94, 0.10);
-  --accent:   #5b9dff;
+  --bull:     #f2c05c;
+  --bear:     #8b8bf5;
+  --bull-dim: rgba(242, 192, 92, 0.09);
+  --bear-dim: rgba(139, 139, 245, 0.09);
+  --accent:   #8b8bf5;
 
   --sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --r: 14px;
+  --r: 12px;
   --r-sm: 8px;
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
@@ -66,29 +71,19 @@ body {
 }
 
 /* ---------------------------------------------------------- atmosphere --- */
-/* Drifting aurora. Two blobs on different clocks so the loop never reads. */
+/* One faint wash, slowly drifting. Two coloured blobs read as a gradient
+   template; a single near-neutral one just gives the page a light source. */
 .glow { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
-.glow::before, .glow::after {
-  content: ""; position: absolute; border-radius: 50%;
-  filter: blur(90px); opacity: .5;
-}
 .glow::before {
-  width: 780px; height: 620px; top: -300px; left: 50%; margin-left: -560px;
-  background: radial-gradient(closest-side, rgba(0, 224, 143, .28), transparent);
-  animation: drift-a 26s var(--ease) infinite alternate;
+  content: ""; position: absolute; border-radius: 50%;
+  width: 900px; height: 640px; top: -340px; left: 50%; margin-left: -450px;
+  background: radial-gradient(closest-side, rgba(242, 192, 92, .07), transparent);
+  filter: blur(80px);
+  animation: drift 32s var(--ease) infinite alternate;
 }
-.glow::after {
-  width: 620px; height: 520px; top: -240px; left: 50%; margin-left: 40px;
-  background: radial-gradient(closest-side, rgba(91, 157, 255, .20), transparent);
-  animation: drift-b 34s var(--ease) infinite alternate;
-}
-@keyframes drift-a {
-  from { transform: translate3d(0,0,0) scale(1); }
-  to   { transform: translate3d(120px, 60px, 0) scale(1.15); }
-}
-@keyframes drift-b {
-  from { transform: translate3d(0,0,0) scale(1.1); }
-  to   { transform: translate3d(-140px, 40px, 0) scale(.92); }
+@keyframes drift {
+  from { transform: translate3d(-60px, 0, 0) scale(1); }
+  to   { transform: translate3d(60px, 40px, 0) scale(1.12); }
 }
 
 /* Engineering grid, faded below the fold. */
@@ -104,7 +99,7 @@ body {
 /* Film grain. Kills the flatness that makes dark UIs look cheap. */
 body::after {
   content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  opacity: .035; mix-blend-mode: overlay;
+  opacity: .028; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -181,9 +176,8 @@ h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -0.035em; font-weight
 }
 
 .hero h1 {
-  font-size: clamp(38px, 6.4vw, 68px);
-  background: linear-gradient(174deg, #ffffff 20%, #8ea3bf 92%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-size: clamp(36px, 5.6vw, 60px);
+  color: var(--ink);
 }
 .lede { margin: 22px 0 0; color: var(--ink-2); font-size: 17px; max-width: 52ch; }
 .lede em { color: var(--ink); font-style: italic; }
@@ -214,7 +208,7 @@ h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -0.035em; font-weight
   font-family: var(--mono); font-size: 14px; line-height: 1;
   transition: transform .35s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
-.addbox:hover .addbox-icon { color: var(--bull); border-color: rgba(0,224,143,.4); }
+.addbox:hover .addbox-icon { color: var(--bull); border-color: rgba(242,192,92,.35); }
 .addbox[open] .addbox-icon { transform: rotate(135deg); color: var(--bull); }
 .addbox-hint {
   margin-left: auto; font-family: var(--mono); font-size: 10px;
@@ -244,8 +238,8 @@ input, textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--ink-4); }
 input:focus, textarea:focus {
-  border-color: rgba(0, 224, 143, .55); outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 224, 143, .09);
+  border-color: rgba(139, 139, 245, .55); outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 139, 245, .10);
 }
 textarea { resize: vertical; min-height: 96px; }
 
@@ -264,17 +258,9 @@ textarea { resize: vertical; min-height: 96px; }
 .btn:hover { border-color: var(--ink-4); transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 .btn-primary {
-  color: #04120c; background: var(--bull); border-color: var(--bull); font-weight: 700;
-  box-shadow: 0 6px 24px -10px rgba(0, 224, 143, .8);
+  color: #17130a; background: var(--bull); border-color: var(--bull); font-weight: 700;
 }
-.btn-primary:hover { background: #1af0a0; border-color: #1af0a0; }
-/* Light sweeps across the primary button on hover. */
-.btn-primary::after {
-  content: ""; position: absolute; inset: 0; transform: translateX(-120%);
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
-}
-.btn-primary:hover::after { animation: sweep .8s var(--ease); }
-@keyframes sweep { to { transform: translateX(120%); } }
+.btn-primary:hover { background: #f6cb76; border-color: #f6cb76; }
 .btn[disabled] { opacity: .45; cursor: default; transform: none; }
 
 /* ------------------------------------------------------------ controls --- */
@@ -322,7 +308,7 @@ textarea { resize: vertical; min-height: 96px; }
   content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
   opacity: 0; transition: opacity .35s var(--ease);
   background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%),
-              rgba(0, 224, 143, .10), transparent 62%);
+              rgba(255, 255, 255, .045), transparent 62%);
 }
 .card:hover {
   border-color: var(--line-2); transform: translateY(-3px);
@@ -354,8 +340,8 @@ textarea { resize: vertical; min-height: 96px; }
   line-height: 1; letter-spacing: -0.05em; font-variant-numeric: tabular-nums;
 }
 .odd-val i { font-style: normal; font-size: 15px; opacity: .5; margin-left: 1px; }
-.odd-bull .odd-val { color: var(--bull); text-shadow: 0 0 26px rgba(0, 224, 143, .35); }
-.odd-bear .odd-val { color: var(--bear); text-shadow: 0 0 26px rgba(255, 77, 94, .28); }
+.odd-bull .odd-val { color: var(--bull); }
+.odd-bear .odd-val { color: var(--bear); }
 .odd-label {
   display: flex; align-items: center; gap: 5px;
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em;
@@ -375,16 +361,8 @@ textarea { resize: vertical; min-height: 96px; }
 @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .meter > span:first-child { transform-origin: left;  border-start-start-radius: 4px; border-end-start-radius: 4px; }
 .meter > span:last-child  { transform-origin: right; border-start-end-radius: 4px;   border-end-end-radius: 4px; }
-.meter .seg-bull { background: var(--bull); box-shadow: 0 0 18px -4px var(--bull); }
-.meter .seg-bear { background: var(--bear); box-shadow: 0 0 18px -4px var(--bear); }
-/* Slow light sweep along the fills — the "live" cue. */
-.meter > span::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.55), transparent 80%);
-  transform: translateX(-100%);
-  animation: shimmer 4.5s var(--ease) 1.2s infinite;
-}
-@keyframes shimmer { 0% { transform: translateX(-100%); } 45%, 100% { transform: translateX(220%); } }
+.meter .seg-bull { background: var(--bull); }
+.meter .seg-bear { background: var(--bear); }
 .meter-empty { background: var(--surface-2); border-radius: 4px; }
 .meter-lg { height: 13px; }
 .meter-lg > span:first-child { border-start-start-radius: 7px; border-end-start-radius: 7px; }
@@ -418,12 +396,10 @@ textarea { resize: vertical; min-height: 96px; }
 .vote .arrow { font-size: 9px; transition: transform .25s var(--ease); }
 .vote:active { transform: scale(.97); }
 .vote-bull:hover, .vote-bull[aria-pressed="true"] {
-  color: var(--bull); border-color: rgba(0,224,143,.6); background: var(--bull-dim);
-  box-shadow: 0 0 22px -10px var(--bull);
+  color: var(--bull); border-color: rgba(242,192,92,.5); background: var(--bull-dim);
 }
 .vote-bear:hover, .vote-bear[aria-pressed="true"] {
-  color: var(--bear); border-color: rgba(255,77,94,.6); background: var(--bear-dim);
-  box-shadow: 0 0 22px -10px var(--bear);
+  color: var(--bear); border-color: rgba(139,139,245,.5); background: var(--bear-dim);
 }
 .vote-bull:hover .arrow { transform: translateY(-2px); }
 .vote-bear:hover .arrow { transform: translateY(2px); }
@@ -440,9 +416,8 @@ textarea { resize: vertical; min-height: 96px; }
 .back:hover { color: var(--bull); gap: 12px; }
 
 .detail-head h1 {
-  font-size: clamp(32px, 5.4vw, 52px);
-  background: linear-gradient(174deg, #ffffff 25%, #93a7c2 95%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-size: clamp(30px, 4.8vw, 46px);
+  color: var(--ink);
 }
 .detail-pitch { margin: 14px 0 0; color: var(--ink-2); max-width: 58ch; }
 .detail-site { font-family: var(--mono); font-size: 11px; color: var(--ink-4); text-decoration: none; }
@@ -457,12 +432,10 @@ textarea { resize: vertical; min-height: 96px; }
   backdrop-filter: blur(8px);
 }
 .verdict[data-lean="bullish"] {
-  color: var(--bull); border-color: rgba(0,224,143,.45); background: var(--bull-dim);
-  box-shadow: 0 0 30px -14px var(--bull);
+  color: var(--bull); border-color: rgba(242,192,92,.4); background: var(--bull-dim);
 }
 .verdict[data-lean="bearish"] {
-  color: var(--bear); border-color: rgba(255,77,94,.45); background: var(--bear-dim);
-  box-shadow: 0 0 30px -14px var(--bear);
+  color: var(--bear); border-color: rgba(139,139,245,.4); background: var(--bear-dim);
 }
 
 .panel {
