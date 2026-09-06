@@ -1,0 +1,21 @@
+{
+  "name": "bullishorbearish",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "An open board where anyone can add a startup and call it bullish or bearish - and say why.",
+  "license": "MIT",
+  "homepage": "https://bullishorbearish.com",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
