@@ -48,6 +48,44 @@ function ago(stamp) {
   return 'just now';
 }
 
+/* ------------------------------------------------------------- motion --- */
+/* Every effect below is decoration. When the viewer asks for less motion they
+   get the final state immediately, never a degraded animation. */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Cursor-tracked glow. Written through CSSOM, which CSP allows where an
+    inline style attribute would be blocked. */
+function spotlight(node) {
+  if (REDUCED) return node;
+  node.addEventListener('pointermove', (event) => {
+    const box = node.getBoundingClientRect();
+    node.style.setProperty('--mx', `${event.clientX - box.left}px`);
+    node.style.setProperty('--my', `${event.clientY - box.top}px`);
+  });
+  return node;
+}
+
+/** Ticks a number up to its value. Cubic ease-out over ~0.6s. */
+function countUp(textNode, target) {
+  if (REDUCED || target === 0) {
+    textNode.nodeValue = String(target);
+    return;
+  }
+  const started = performance.now();
+  const step = (now) => {
+    const t = Math.min((now - started) / 620, 1);
+    textNode.nodeValue = String(Math.round(target * (1 - (1 - t) ** 3)));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/** Entrance delay for a list, capped so long boards don't crawl in. */
+function stagger(node, index) {
+  node.style.setProperty('--i', `${Math.min(index, 12) * 45}ms`);
+  return node;
+}
+
 /* ------------------------------------------------------- shared pieces --- */
 /** Two segments, proportional, with the stylesheet's 2px gap between them.
     Zero-count sides are omitted so the survivor keeps both rounded caps. */
@@ -77,11 +115,14 @@ function odds(s) {
       el('span', { class: 'odd-empty', text: 'No calls yet — be first' }));
   }
   const bull = s.bullishPct;
-  const side = (dir, value, arrow, label) =>
-    el('div', { class: `odd odd-${dir}` },
-      el('span', { class: 'odd-val' }, String(value), el('i', { text: '%' })),
+  const side = (dir, value, arrow, label) => {
+    const figure = document.createTextNode('0');
+    countUp(figure, value);
+    return el('div', { class: `odd odd-${dir}` },
+      el('span', { class: 'odd-val' }, figure, el('i', { text: '%' })),
       el('span', { class: 'odd-label' },
         el('span', { 'aria-hidden': 'true', text: arrow }), label));
+  };
   return el('div', { class: 'odds' },
     side('bull', bull, '▲', 'Bullish'),
     side('bear', 100 - bull, '▼', 'Bearish'));
@@ -112,7 +153,7 @@ const SORT_TABS = [
 const state = { sort: 'hot', q: '' };
 
 function card(s) {
-  const node = el('li', { class: 'card' });
+  const node = spotlight(el('li', { class: 'card' }));
 
   const meta = el('div', { class: 'card-meta' });
   if (s.total) {
@@ -171,7 +212,7 @@ async function loadBoard() {
     const params = new URLSearchParams({ sort: state.sort });
     if (state.q) params.set('q', state.q);
     const { startups } = await api(`/api/startups?${params}`);
-    board.replaceChildren(...startups.map(card));
+    board.replaceChildren(...startups.map((s, i) => stagger(card(s), i)));
     empty.hidden = startups.length > 0;
     empty.textContent = state.q
       ? `Nothing on the board matches “${state.q}” yet. Add it above.`
@@ -215,43 +256,70 @@ function renderDetail(host, data) {
   let chosen = data.you?.direction ?? null;
   document.title = `${s.name} — Bullish or Bearish`;
 
-  const lean = !s.total ? 'none' : s.bullishPct > 55 ? 'bullish' : s.bullishPct < 45 ? 'bearish' : 'split';
-  const verdictText = {
-    none: 'No calls yet',
-    bullish: `The crowd is bullish · ${s.bullishPct}%`,
-    bearish: `The crowd is bearish · ${100 - s.bullishPct}%`,
-    split: `Split down the middle · ${s.bullishPct}% bullish`,
-  }[lean];
-
-  const takesList = el('ul', { class: 'takes' }, ...data.takes.map(takeItem));
   const reason = el('textarea', {
-    id: 'f-reason', maxlength: '700', placeholder: 'What makes you bullish or bearish? Be specific.',
+    id: 'f-reason', maxlength: '700',
+    placeholder: 'What makes you bullish or bearish? Be specific.',
   });
-  const author = el('input', { id: 'f-author', maxlength: '40', placeholder: 'Anonymous', autocomplete: 'off' });
+  const author = el('input', {
+    id: 'f-author', maxlength: '40', placeholder: 'Anonymous', autocomplete: 'off',
+  });
   if (data.you?.reason) reason.value = data.you.reason;
   if (data.you?.author) author.value = data.you.author;
 
   const msg = el('p', { class: 'hint', role: 'status' });
+  const save = el('button', { class: 'btn btn-primary', type: 'submit', text: 'Post your take' });
   const buttons = el('div');
+  const verdict = el('div', { class: 'verdict' });
+  const statsPanel = el('div', { class: 'panel panel-meter' });
 
-  const paint = () => {
+  /* Repaint only the numbers. Re-rendering the whole view here would swap the
+     textarea out from under whoever is mid-sentence in it. */
+  const paintStats = (startup) => {
+    const lean = !startup.total ? 'none'
+      : startup.bullishPct > 55 ? 'bullish'
+      : startup.bullishPct < 45 ? 'bearish' : 'split';
+    const text = {
+      none: 'No calls yet',
+      bullish: `The crowd is bullish · ${startup.bullishPct}%`,
+      bearish: `The crowd is bearish · ${100 - startup.bullishPct}%`,
+      split: `Split down the middle · ${startup.bullishPct}% bullish`,
+    }[lean];
+    verdict.dataset.lean = lean;
+    verdict.replaceChildren(
+      el('span', { 'aria-hidden': 'true',
+        text: lean === 'bullish' ? '▲' : lean === 'bearish' ? '▼' : '◆' }),
+      text);
+    statsPanel.replaceChildren(
+      odds(startup),
+      meter(startup, { large: true }),
+      el('div', { class: 'card-meta' },
+        el('b', { text: startup.total.toLocaleString() }), ' votes',
+        el('span', { class: 'sep', text: '·' }),
+        el('b', { text: startup.takes.toLocaleString() }), ' written takes'));
+  };
+
+  const paintButtons = () => {
     buttons.replaceChildren(voteButtons(chosen, async (direction) => {
       chosen = direction;
-      paint();
+      paintButtons();
       try {
-        await api(`/api/startups/${s.slug}/votes`, { method: 'POST', body: { direction } });
+        // No `reason` key: picking a side must not clear a take already written.
+        const res = await api(`/api/startups/${s.slug}/votes`, {
+          method: 'POST', body: { direction },
+        });
+        paintStats(res.startup);
+        loadTape();
         msg.dataset.tone = 'good';
         msg.textContent = 'Call recorded. Add your reasoning below — that is the useful part.';
-        refreshDetail(host, s.slug, { keepDraft: { reason: reason.value, author: author.value } });
       } catch (err) {
         msg.dataset.tone = 'bad';
         msg.textContent = err.message;
       }
     }));
   };
-  paint();
 
-  const save = el('button', { class: 'btn btn-primary', type: 'submit', text: 'Post your take' });
+  paintStats(s);
+  paintButtons();
 
   host.replaceChildren(
     el('a', { class: 'back', href: '/', text: '← All startups' }),
@@ -261,20 +329,11 @@ function renderDetail(host, data) {
         s.pitch ? el('p', { class: 'detail-pitch', text: s.pitch }) : null,
         s.website
           ? el('p', { class: 'detail-pitch' },
-              el('a', { class: 'card-site', href: s.website, rel: 'nofollow noopener ugc',
+              el('a', { class: 'detail-site', href: s.website, rel: 'nofollow noopener ugc',
                         target: '_blank', text: new URL(s.website).hostname.replace(/^www\./, '') }))
           : null)),
-    el('div', { class: 'verdict', dataset: { lean } },
-      el('span', { 'aria-hidden': 'true', text: lean === 'bullish' ? '▲' : lean === 'bearish' ? '▼' : '◆' }),
-      verdictText),
-
-    el('div', { class: 'panel panel-meter' },
-      odds(s),
-      meter(s, { large: true }),
-      el('div', { class: 'card-meta' },
-        el('b', { text: s.total.toLocaleString() }), ' votes',
-        el('span', { class: 'sep', text: '·' }),
-        el('b', { text: s.takes.toLocaleString() }), ' written takes')),
+    verdict,
+    statsPanel,
 
     el('form', {
       class: 'panel voteform', novalidate: true,
@@ -304,30 +363,22 @@ function renderDetail(host, data) {
         ? 'You have already voted here — changing it updates your call rather than adding a second one.'
         : 'One vote per person. You can change it later.' }),
       buttons,
+      el('div', { class: 'field' }, el('label', { for: 'f-reason', text: 'Why?' }), reason),
       el('div', { class: 'field' },
-        el('label', { for: 'f-reason', text: 'Why?' }), reason),
-      el('div', { class: 'field' },
-        el('label', { for: 'f-author' }, 'Your name ', el('span', { class: 'opt', text: 'optional' })), author),
+        el('label', { for: 'f-author' }, 'Your name ', el('span', { class: 'opt', text: 'optional' })),
+        author),
       el('div', { class: 'addform-foot' }, msg, save)),
 
     el('h2', { class: 'section-label', text: data.takes.length
       ? `${plural(data.takes.length, 'take')} on ${s.name}`
       : `No written takes on ${s.name} yet` }),
-    takesList,
+    el('ul', { class: 'takes' }, ...data.takes.map((t, i) => stagger(takeItem(t), i))),
   );
-
-  // Restore an in-progress draft after a re-render triggered by a quick vote.
-  if (host.dataset.draftReason) { reason.value = host.dataset.draftReason; delete host.dataset.draftReason; }
-  if (host.dataset.draftAuthor) { author.value = host.dataset.draftAuthor; delete host.dataset.draftAuthor; }
 }
 
-async function refreshDetail(host, slug, { keepDraft } = {}) {
+async function refreshDetail(host, slug) {
   try {
     const data = await api(`/api/startups/${slug}`);
-    if (keepDraft) {
-      host.dataset.draftReason = keepDraft.reason ?? '';
-      host.dataset.draftAuthor = keepDraft.author ?? '';
-    }
     renderDetail(host, data);
   } catch (err) {
     host.replaceChildren(
@@ -357,9 +408,13 @@ function route() {
 }
 
 function go(path) {
-  history.pushState({}, '', path);
-  route();
-  window.scrollTo(0, 0);
+  const navigate = () => {
+    history.pushState({}, '', path);
+    route();
+    window.scrollTo(0, 0);
+  };
+  if (document.startViewTransition && !REDUCED) document.startViewTransition(navigate);
+  else navigate();
 }
 
 document.addEventListener('click', (event) => {

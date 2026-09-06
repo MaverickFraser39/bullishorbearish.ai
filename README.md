@@ -67,6 +67,11 @@ colourblind separation, normal-vision separation, contrast — passes. And every
 indicator still ships with an arrow and a written label, so hue never carries the
 result by itself.
 
+**Motion is decoration, never information.** Entrances, the drifting aurora,
+the cursor spotlight, the counting figures and the shimmer on the meters are all
+ornament. Under `prefers-reduced-motion` every one of them is cut and the final
+state renders immediately — no degraded animation, nothing withheld.
+
 **Dark only, by choice.** There is no light theme and no toggle. The palette,
 the glow on the meters and the grid ground are built for one surface, and a
 half-hearted inverse of them would be worse than not offering one.
