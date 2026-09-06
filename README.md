@@ -44,11 +44,12 @@ npm run dev      # http://localhost:3000
 
 ```
 server.js          HTTP layer: routes, rate limiting, voter fingerprinting
-lib/db.js          schema and every query
+lib/db.js          schema and every query — no SQL lives anywhere else
 lib/validate.js    input parsing; nothing reaches the database unvalidated
-public/            the whole client — index.html, app.js, styles.css
+public/            the whole client — index.html, app.js, styles.css, favicon.svg
 scripts/seed.js    sample board
 tests/             node:test suite
+docs/              images used by this README
 ```
 
 ## Decisions worth knowing about
