@@ -48,33 +48,6 @@ function ago(stamp) {
   return 'just now';
 }
 
-/* ---------------------------------------------------------------- theme --- */
-const THEME_KEY = 'bob:theme';
-const store = {
-  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
-  set(key, value) { try { localStorage.setItem(key, value); } catch { /* private mode */ } },
-};
-
-function applyTheme(theme) {
-  if (theme) document.documentElement.dataset.theme = theme;
-  else delete document.documentElement.dataset.theme;
-  const dark = theme
-    ? theme === 'dark'
-    : matchMedia('(prefers-color-scheme: dark)').matches;
-  const icon = $('[data-theme-icon]');
-  if (icon) icon.textContent = dark ? '☀' : '☾';
-}
-
-applyTheme(store.get(THEME_KEY));
-$('[data-theme-toggle]').addEventListener('click', () => {
-  const dark = document.documentElement.dataset.theme
-    ? document.documentElement.dataset.theme === 'dark'
-    : matchMedia('(prefers-color-scheme: dark)').matches;
-  const next = dark ? 'light' : 'dark';
-  store.set(THEME_KEY, next);
-  applyTheme(next);
-});
-
 /* ------------------------------------------------------- shared pieces --- */
 /** Two segments, proportional, with the stylesheet's 2px gap between them.
     Zero-count sides are omitted so the survivor keeps both rounded caps. */
@@ -96,22 +69,22 @@ function meter(s, { large = false } = {}) {
   return node;
 }
 
-/** The direct labels. Every number sits in text, so colour is never the only
-    channel and the light-mode contrast relief is satisfied. */
-function readout(s) {
+/** The odds readout. Values live in text beside the bar, so colour is never
+    the only channel carrying the result. */
+function odds(s) {
   if (!s.total) {
-    return el('div', { class: 'readout' },
-      el('span', { class: 'rd-rest', text: 'No votes yet — be the first to call it.' }));
+    return el('div', { class: 'odds' },
+      el('span', { class: 'odd-empty', text: 'No calls yet — be first' }));
   }
-  return el('div', { class: 'readout' },
-    el('span', { class: 'rd-bull' },
-      el('span', { 'aria-hidden': 'true' }, '▲ '),
-      el('b', { text: `${s.bullishPct}% bullish` }), ` · ${s.bullish.toLocaleString()}`),
-    el('span', { class: 'rd-bear' },
-      el('span', { 'aria-hidden': 'true' }, '▼ '),
-      el('b', { text: `${100 - s.bullishPct}% bearish` }), ` · ${s.bearish.toLocaleString()}`),
-    el('span', { class: 'rd-rest',
-      text: `${plural(s.total, 'vote')}${s.takes ? ` · ${plural(s.takes, 'take')}` : ''}` }));
+  const bull = s.bullishPct;
+  const side = (dir, value, arrow, label) =>
+    el('div', { class: `odd odd-${dir}` },
+      el('span', { class: 'odd-val' }, String(value), el('i', { text: '%' })),
+      el('span', { class: 'odd-label' },
+        el('span', { 'aria-hidden': 'true', text: arrow }), label));
+  return el('div', { class: 'odds' },
+    side('bull', bull, '▲', 'Bullish'),
+    side('bear', 100 - bull, '▼', 'Bearish'));
 }
 
 function voteButtons(chosen, onPick) {
@@ -141,35 +114,42 @@ const state = { sort: 'hot', q: '' };
 function card(s) {
   const node = el('li', { class: 'card' });
 
-  const title = el('div', { class: 'card-title' },
-    el('a', { class: 'card-name', href: `/s/${s.slug}`, text: s.name }),
-    s.pitch ? el('p', { class: 'card-pitch', text: s.pitch }) : null);
+  const meta = el('div', { class: 'card-meta' });
+  if (s.total) {
+    meta.append(
+      el('b', { text: s.total.toLocaleString() }), ' votes',
+      el('span', { class: 'sep', text: '·' }),
+      el('b', { text: s.takes.toLocaleString() }), ' takes');
+  } else {
+    meta.append('Awaiting first call');
+  }
+  meta.append(el('a', { href: `/s/${s.slug}`, text: s.takes ? 'Read takes →' : 'Say why →' }));
 
   node.append(
-    el('div', { class: 'card-head' }, title,
-      s.website
-        ? el('a', {
-            class: 'card-site', href: s.website, rel: 'nofollow noopener ugc',
-            target: '_blank', text: new URL(s.website).hostname.replace(/^www\./, ''),
-          })
-        : null),
+    el('div', {},
+      el('div', { class: 'card-head' },
+        el('a', { class: 'card-name', href: `/s/${s.slug}`, text: s.name }),
+        s.website
+          ? el('a', {
+              class: 'card-site', href: s.website, rel: 'nofollow noopener ugc',
+              target: '_blank', text: new URL(s.website).hostname.replace(/^www\./, ''),
+            })
+          : null),
+      s.pitch ? el('p', { class: 'card-pitch', text: s.pitch }) : null),
+    odds(s),
     meter(s),
-    readout(s),
-    el('div', { class: 'card-foot' },
-      voteButtons(null, async (direction) => {
-        try {
-          // No `reason` key: a quick call here must not wipe a take
-          // this person already wrote on the detail page.
-          const { startup } = await api(`/api/startups/${s.slug}/votes`, {
-            method: 'POST', body: { direction },
-          });
-          node.replaceWith(card(startup));
-        } catch (err) {
-          alert(err.message);
-        }
-      }),
-      el('a', { class: 'card-site', href: `/s/${s.slug}`,
-                text: s.takes ? `Read ${plural(s.takes, 'take')} →` : 'Say why →' })),
+    meta,
+    voteButtons(null, async (direction) => {
+      try {
+        // No `reason` key: a quick call must not wipe a take written earlier.
+        const { startup } = await api(`/api/startups/${s.slug}/votes`, {
+          method: 'POST', body: { direction },
+        });
+        node.replaceWith(card(startup));
+      } catch (err) {
+        alert(err.message);
+      }
+    }),
   );
   return node;
 }
@@ -203,19 +183,19 @@ async function loadBoard() {
   }
 }
 
-async function loadStats() {
+async function loadTape() {
   try {
     const s = await api('/api/stats');
     const pct = s.votes ? Math.round((s.bullish / s.votes) * 100) : null;
-    $('[data-stats]').replaceChildren(
-      ...[
-        ['Startups', s.startups.toLocaleString()],
-        ['Votes cast', s.votes.toLocaleString()],
-        ['Written takes', s.takes.toLocaleString()],
-        ['Crowd lean', pct === null ? '—' : `${pct}% bullish`],
-      ].map(([label, value]) =>
-        el('div', {}, el('dd', { text: value }), el('dt', { text: label }))));
-  } catch { /* the stat strip is decorative; the board still works */ }
+    const cell = (label, value, cls) =>
+      el('span', {}, `${label} `, el('b', { class: cls || null, text: value }));
+    $('[data-tape]').replaceChildren(
+      cell('Startups', s.startups.toLocaleString()),
+      cell('Votes', s.votes.toLocaleString()),
+      cell('Takes', s.takes.toLocaleString()),
+      cell('Lean', pct === null ? '—' : `${pct}% ▲`, pct === null ? null : pct >= 50 ? 'up' : 'down'),
+    );
+  } catch { /* the ticker is decorative; the board still works without it */ }
 }
 
 /* --------------------------------------------------------- detail view --- */
@@ -289,8 +269,12 @@ function renderDetail(host, data) {
       verdictText),
 
     el('div', { class: 'panel panel-meter' },
+      odds(s),
       meter(s, { large: true }),
-      readout(s)),
+      el('div', { class: 'card-meta' },
+        el('b', { text: s.total.toLocaleString() }), ' votes',
+        el('span', { class: 'sep', text: '·' }),
+        el('b', { text: s.takes.toLocaleString() }), ' written takes')),
 
     el('form', {
       class: 'panel voteform', novalidate: true,
@@ -326,9 +310,9 @@ function renderDetail(host, data) {
         el('label', { for: 'f-author' }, 'Your name ', el('span', { class: 'opt', text: 'optional' })), author),
       el('div', { class: 'addform-foot' }, msg, save)),
 
-    el('h2', { class: 'panel-sub', text: data.takes.length
+    el('h2', { class: 'section-label', text: data.takes.length
       ? `${plural(data.takes.length, 'take')} on ${s.name}`
-      : `No written takes on ${s.name} yet.` }),
+      : `No written takes on ${s.name} yet` }),
     takesList,
   );
 
@@ -367,7 +351,7 @@ function route() {
     detailView.hidden = true;
     listView.hidden = false;
     document.title = 'Bullish or Bearish — the open startup sentiment board';
-    loadStats();
+    loadTape();
     loadBoard();
   }
 }
