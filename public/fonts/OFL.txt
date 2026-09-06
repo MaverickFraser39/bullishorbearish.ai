@@ -1,8 +1,8 @@
-The fonts in this directory are subsets of Space Grotesk and JetBrains Mono,
-both licensed under the SIL Open Font License, Version 1.1.
+The fonts in this directory are latin subsets of Geist, Geist Mono and Martian
+Mono, all licensed under the SIL Open Font License, Version 1.1.
 
-  Space Grotesk  © 2020 Florian Karsten — https://github.com/floriankarsten/space-grotesk
-  JetBrains Mono © 2020 JetBrains        — https://github.com/JetBrains/JetBrainsMono
+  Geist / Geist Mono  © 2023 Vercel      — https://github.com/vercel/geist-font
+  Martian Mono        © 2022 Evil Martians — https://github.com/evilmartians/mono
 
 Full licence text: https://scripts.sil.org/OFL
 

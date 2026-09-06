@@ -18,14 +18,20 @@
    ========================================================================= */
 
 @font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk.woff2') format('woff2-variations');
+  font-family: 'Geist';
+  src: url('/fonts/geist.woff2') format('woff2-variations');
   font-weight: 400 700; font-display: swap;
   unicode-range: U+0000-00FF, U+2010-2027, U+2030-205E, U+20A0-20BF, U+2190-21BB, U+25A0-25FF;
 }
 @font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/jetbrains-mono.woff2') format('woff2-variations');
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono.woff2') format('woff2-variations');
+  font-weight: 400 700; font-display: swap;
+  unicode-range: U+0000-00FF, U+2010-2027, U+2030-205E, U+20A0-20BF, U+2190-21BB, U+25A0-25FF;
+}
+@font-face {
+  font-family: 'Martian Mono';
+  src: url('/fonts/martian-mono.woff2') format('woff2-variations');
   font-weight: 400 700; font-display: swap;
   unicode-range: U+0000-00FF, U+2010-2027, U+2030-205E, U+20A0-20BF, U+2190-21BB, U+25A0-25FF;
 }
@@ -45,14 +51,15 @@
   --ink-3: #71717a;
   --ink-4: #52525b;
 
-  --bull:     #f2c05c;
-  --bear:     #8b8bf5;
-  --bull-dim: rgba(242, 192, 92, 0.09);
-  --bear-dim: rgba(139, 139, 245, 0.09);
-  --accent:   #8b8bf5;
+  --bull:     #00e08f;
+  --bear:     #ff4d5e;
+  --bull-dim: rgba(0, 224, 143, 0.10);
+  --bear-dim: rgba(255, 77, 94, 0.10);
+  --accent:   #00e08f;
 
-  --sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --sans:    'Geist', system-ui, -apple-system, sans-serif;
+  --mono:    'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+  --display: 'Martian Mono', 'Geist Mono', ui-monospace, monospace;
 
   --r: 12px;
   --r-sm: 8px;
@@ -77,7 +84,7 @@ body {
 .glow::before {
   content: ""; position: absolute; border-radius: 50%;
   width: 900px; height: 640px; top: -340px; left: 50%; margin-left: -450px;
-  background: radial-gradient(closest-side, rgba(242, 192, 92, .07), transparent);
+  background: radial-gradient(closest-side, rgba(0, 224, 143, .07), transparent);
   filter: blur(80px);
   animation: drift 32s var(--ease) infinite alternate;
 }
@@ -176,7 +183,11 @@ h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -0.035em; font-weight
 }
 
 .hero h1 {
-  font-size: clamp(36px, 5.6vw, 60px);
+  font-family: var(--display);
+  font-size: clamp(23px, 3.3vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.16;
   color: var(--ink);
 }
 .lede { margin: 22px 0 0; color: var(--ink-2); font-size: 17px; max-width: 52ch; }
@@ -208,7 +219,7 @@ h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -0.035em; font-weight
   font-family: var(--mono); font-size: 14px; line-height: 1;
   transition: transform .35s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
-.addbox:hover .addbox-icon { color: var(--bull); border-color: rgba(242,192,92,.35); }
+.addbox:hover .addbox-icon { color: var(--bull); border-color: rgba(0,224,143,.35); }
 .addbox[open] .addbox-icon { transform: rotate(135deg); color: var(--bull); }
 .addbox-hint {
   margin-left: auto; font-family: var(--mono); font-size: 10px;
@@ -238,8 +249,8 @@ input, textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--ink-4); }
 input:focus, textarea:focus {
-  border-color: rgba(139, 139, 245, .55); outline: none;
-  box-shadow: 0 0 0 3px rgba(139, 139, 245, .10);
+  border-color: rgba(0, 224, 143, .5); outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 224, 143, .09);
 }
 textarea { resize: vertical; min-height: 96px; }
 
@@ -258,9 +269,9 @@ textarea { resize: vertical; min-height: 96px; }
 .btn:hover { border-color: var(--ink-4); transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 .btn-primary {
-  color: #17130a; background: var(--bull); border-color: var(--bull); font-weight: 700;
+  color: #04120c; background: var(--bull); border-color: var(--bull); font-weight: 700;
 }
-.btn-primary:hover { background: #f6cb76; border-color: #f6cb76; }
+.btn-primary:hover { background: #1af0a0; border-color: #1af0a0; }
 .btn[disabled] { opacity: .45; cursor: default; transform: none; }
 
 /* ------------------------------------------------------------ controls --- */
@@ -318,7 +329,8 @@ textarea { resize: vertical; min-height: 96px; }
 
 .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .card-name {
-  font-size: 17px; font-weight: 700; letter-spacing: -0.025em; text-decoration: none;
+  font-family: var(--display); font-size: 13.5px; font-weight: 600;
+  letter-spacing: -0.045em; text-decoration: none;
   transition: color .2s var(--ease);
 }
 .card:hover .card-name { color: var(--bull); }
@@ -396,10 +408,10 @@ textarea { resize: vertical; min-height: 96px; }
 .vote .arrow { font-size: 9px; transition: transform .25s var(--ease); }
 .vote:active { transform: scale(.97); }
 .vote-bull:hover, .vote-bull[aria-pressed="true"] {
-  color: var(--bull); border-color: rgba(242,192,92,.5); background: var(--bull-dim);
+  color: var(--bull); border-color: rgba(0,224,143,.5); background: var(--bull-dim);
 }
 .vote-bear:hover, .vote-bear[aria-pressed="true"] {
-  color: var(--bear); border-color: rgba(139,139,245,.5); background: var(--bear-dim);
+  color: var(--bear); border-color: rgba(255,77,94,.5); background: var(--bear-dim);
 }
 .vote-bull:hover .arrow { transform: translateY(-2px); }
 .vote-bear:hover .arrow { transform: translateY(2px); }
@@ -416,7 +428,11 @@ textarea { resize: vertical; min-height: 96px; }
 .back:hover { color: var(--bull); gap: 12px; }
 
 .detail-head h1 {
-  font-size: clamp(30px, 4.8vw, 46px);
+  font-family: var(--display);
+  font-size: clamp(21px, 3vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.18;
   color: var(--ink);
 }
 .detail-pitch { margin: 14px 0 0; color: var(--ink-2); max-width: 58ch; }
@@ -432,10 +448,10 @@ textarea { resize: vertical; min-height: 96px; }
   backdrop-filter: blur(8px);
 }
 .verdict[data-lean="bullish"] {
-  color: var(--bull); border-color: rgba(242,192,92,.4); background: var(--bull-dim);
+  color: var(--bull); border-color: rgba(0,224,143,.4); background: var(--bull-dim);
 }
 .verdict[data-lean="bearish"] {
-  color: var(--bear); border-color: rgba(139,139,245,.4); background: var(--bear-dim);
+  color: var(--bear); border-color: rgba(255,77,94,.4); background: var(--bear-dim);
 }
 
 .panel {

@@ -40,6 +40,7 @@ npm run dev      # http://localhost:3000
 | Server | Express 5, one file (`server.js`) |
 | Storage | SQLite through Node's built-in `node:sqlite` — no `better-sqlite3`, nothing to compile |
 | Frontend | Vanilla JS modules and one stylesheet. No framework, no bundler, no build |
+| Type | Geist, Geist Mono and Martian Mono — self-hosted latin subsets (~72KB), so there are no third-party requests |
 | Tests | `node:test` |
 
 ```
@@ -54,17 +55,21 @@ docs/              images used by this README
 
 ## Decisions worth knowing about
 
-**It isn't red and green, on purpose.** Every finance product reaches for that
-pair, which is exactly why it reads as a template. It also editorialises: red is
-the danger colour, and bearish is a legitimate position, not an error. And it
-measures worse — plain green/red separates by ΔE 4.1 under deuteranopia against
-a passing bar of 8, and even a teal-shifted version only reaches 11.2.
+**The green isn't quite green.** Bullish/bearish wants red and green, and that
+is what ships — it is the convention this category reads instantly. But plain
+green/red is the textbook colourblind failure: `#0ca30c` against `#d03b3b`
+separates by only ΔE 4.1 under deuteranopia, where 8 is the passing bar. The
+live pair is `#00e08f` against `#ff4d5e`, which reaches **ΔE 11.2** — the
+bullish hue is stepped toward teal to get there — with a normal-vision ΔE of
+39.3, both over 3:1 on the surface and legible as text at 11.4:1 and 6.1:1.
 
-The live pair is gold `#f2c05c` against indigo `#8b8bf5`: warm versus cool, the
-classic diverging structure, at **ΔE 30.3** — near three times the separation of
-the red/green it replaced. Both clear 3:1 on the surface and read as text at
-10.1:1 and 6.7:1. Arrows and written labels carry the result as well, so hue is
-never load-bearing alone.
+Worth being straight about the trade: a warm/cool pair such as gold against
+indigo measures ΔE 30.3, close to three times the separation, and carries no
+implication that bearish is an error the way a danger-red does. Red/green was
+chosen anyway, for recognisability. That makes the secondary encoding
+load-bearing rather than belt-and-braces: **every** sentiment indicator ships
+with an arrow and a written label, and none of them may be dropped to "clean up"
+the design.
 
 **Restraint is the design.** Colour appears on the figures, the meter, an active
 vote and the live dot — nowhere else. There are no glows on the numbers, no
