@@ -251,6 +251,37 @@ function takeItem(take) {
     el('p', { text: take.reason }));
 }
 
+/** Flags a listing for review. Deliberately low-friction: no account, one
+    field, and it never tells an abuser whether their report landed anywhere. */
+function reportControl(slug) {
+  const status = el('span', { class: 'report-status', role: 'status' });
+  const input = el('input', {
+    type: 'text', maxlength: '500', placeholder: "What's wrong with this listing?",
+  });
+  const form = el('form', {
+    class: 'report-form', hidden: true, novalidate: true,
+    onsubmit: async (event) => {
+      event.preventDefault();
+      try {
+        await api(`/api/startups/${slug}/report`, {
+          method: 'POST', body: { reason: input.value },
+        });
+        form.hidden = true;
+        status.textContent = 'Reported — thank you. It will be reviewed.';
+      } catch (err) {
+        status.textContent = err.message;
+      }
+    },
+  }, input, el('button', { class: 'btn', type: 'submit', text: 'Send' }));
+
+  const toggle = el('button', {
+    class: 'report-toggle', type: 'button', text: 'Report this listing',
+    onclick: () => { form.hidden = !form.hidden; if (!form.hidden) input.focus(); },
+  });
+
+  return el('div', { class: 'report' }, toggle, status, form);
+}
+
 function renderDetail(host, data) {
   const s = data.startup;
   let chosen = data.you?.direction ?? null;
@@ -369,6 +400,8 @@ function renderDetail(host, data) {
         author),
       el('div', { class: 'addform-foot' }, msg, save)),
 
+    reportControl(s.slug),
+
     el('h2', { class: 'section-label', text: data.takes.length
       ? `${plural(data.takes.length, 'take')} on ${s.name}`
       : `No written takes on ${s.name} yet` }),
@@ -422,6 +455,8 @@ document.addEventListener('click', (event) => {
   if (!link || link.target === '_blank' || event.metaKey || event.ctrlKey || event.shiftKey) return;
   const url = new URL(link.href, location.origin);
   if (url.origin !== location.origin) return;
+  // Only these are client-routed; anything else is a real page load.
+  if (url.pathname !== '/' && !url.pathname.startsWith('/s/')) return;
   event.preventDefault();
   go(url.pathname);
 });

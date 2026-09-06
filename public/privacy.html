@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — Bullish or Bearish</title>
+<meta name="robots" content="index,follow">
+<meta name="color-scheme" content="dark">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+<header class="masthead"><div class="wrap masthead-inner">
+  <a class="wordmark" href="/"><span class="wm-bull">BULLISH</span><span class="wm-slash">//</span><span class="wm-bear">BEARISH</span></a>
+</div></header>
+<main class="wrap"><article class="prose">
+<h1>Privacy</h1>
+<p class="updated">Last updated 6 September 2026</p>
+
+<p>Short version: there are no accounts, no cookies, no analytics and no
+third-party requests. This page describes the little that is collected and why.</p>
+
+<h2>What is collected</h2>
+<ul>
+  <li><strong>What you write.</strong> The company names, descriptions and takes you
+      submit, plus the display name you optionally attach. All of it is public by
+      design — that is the point of the site.</li>
+  <li><strong>An anonymous vote fingerprint.</strong> To keep one person from voting
+      fifty times, your IP address and browser user-agent are combined with a secret
+      salt and hashed with SHA-256. Only that hash is stored. Your IP address is
+      <strong>never written to the database</strong>, and the hash cannot be reversed
+      to recover it.</li>
+  <li><strong>Ordinary server logs</strong> held briefly by the hosting provider
+      (Fly.io) for operational purposes.</li>
+</ul>
+
+<h2>What is not collected</h2>
+<ul>
+  <li>No accounts, no email addresses, no passwords.</li>
+  <li>No cookies and no advertising or analytics trackers of any kind.</li>
+  <li>No third-party requests. Fonts are served from this domain, so no font CDN
+      or any other outside party sees your visit.</li>
+</ul>
+
+<h2>Legal basis and retention</h2>
+<p>Under UK and EU data protection law the vote fingerprint is processed on the
+basis of <strong>legitimate interest</strong> — specifically, preventing ballot
+stuffing on a public board. It is the least identifying mechanism that achieves
+that; the alternative would be requiring accounts, which collects far more.</p>
+<p>Submissions are kept until removed. Rotating the salt permanently detaches
+every existing fingerprint from any person.</p>
+
+<h2>Your rights</h2>
+<p>You can ask for content you submitted to be removed, or ask what is held about
+you. Because posting is anonymous, we may be unable to link a request to specific
+entries unless you can identify them. Reach us through
+<a href="https://github.com/MaverickFraser39/bullishorbearish.ai/issues">GitHub issues</a>.</p>
+
+<h2>An honest limitation</h2>
+<p>The vote fingerprint is a speed bump, not a wall. Anyone with a VPN or a second
+browser can vote more than once. Treat every number on this site as directional,
+never authoritative.</p>
+</article></main>
+<footer class="foot"><div class="wrap foot-inner">
+  <p>Open source · MIT. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+  <p><a href="https://github.com/MaverickFraser39/bullishorbearish.ai">Source &amp; contributing →</a></p>
+</div></footer>
+</body>
+</html>

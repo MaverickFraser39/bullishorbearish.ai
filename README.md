@@ -101,6 +101,47 @@ one. A quick vote from the board sends no `reason` field at all, which
 deliberately means "leave my writing alone" — a blank one sent explicitly is
 what clears it.
 
+## Moderation
+
+Anyone can post without an account, so removal has to be possible. Every listing
+carries a **Report** control, and reports queue up for review.
+
+Moderation endpoints are gated on `ADMIN_TOKEN` sent as an `x-admin-token`
+header. With that unset every admin route refuses, so an unconfigured deploy is
+closed rather than open. A wrong token returns `404`, not `401` — an attacker
+learns nothing about whether the route exists.
+
+```bash
+TOKEN=...   # the ADMIN_TOKEN you set
+BASE=https://bullishorbearish.fly.dev
+
+curl -H "x-admin-token: $TOKEN" $BASE/api/admin/reports
+curl -X DELETE -H "x-admin-token: $TOKEN" $BASE/api/admin/startups/<slug>
+curl -X DELETE -H "x-admin-token: $TOKEN" $BASE/api/admin/takes/<id>
+```
+
+Deleting a listing removes its votes and reports with it. Redacting a take
+strips the text and the name while leaving the vote counted, so moderating one
+abusive comment does not silently rewrite the tally.
+
+## Posting to X
+
+The board can post its own activity. Set the four `X_*` values from
+`.env.example` and it posts as that account; leave them unset and it logs what
+it would have posted and carries on.
+
+It is deliberately **not** one post per vote. X's free tier allows roughly 500
+posts a month, and a busy company would burn that in a day and read as a bot.
+Instead, votes for the same company coalesce into a single pending update and
+the queue drains at most one post per `ANNOUNCE_INTERVAL_MS`. Five votes
+landing in a minute produce one accurate post, not five stale ones. A new
+listing gets its own post, and a lean crossing the midpoint is announced as a
+flip.
+
+Requests are signed with OAuth 1.0a using `node:crypto` — no SDK, no
+dependency. The signing is tested against X's published reference vector rather
+than assumed to work.
+
 ## The honest bit about vote integrity
 
 Votes are anonymous, and identity is a salted SHA-256 of IP address plus user

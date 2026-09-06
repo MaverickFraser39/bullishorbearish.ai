@@ -548,3 +548,43 @@ textarea { resize: vertical; min-height: 96px; }
 .hero .lede    { animation: rise .7s var(--ease) .14s both; }
 .addbox        { animation: rise .7s var(--ease) .21s both; }
 .controls      { animation: rise .7s var(--ease) .27s both; }
+
+/* ---------------------------------------------------------------- prose --- */
+.prose { max-width: 68ch; padding: 48px 0 64px; }
+.prose h1 {
+  font-family: var(--display); font-size: clamp(21px, 3vw, 32px);
+  font-weight: 600; letter-spacing: -0.055em; margin-bottom: 10px;
+}
+.prose .updated {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-4); margin: 0 0 36px;
+}
+.prose h2 {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-3); margin: 34px 0 12px;
+}
+.prose p, .prose li { color: var(--ink-2); font-size: 14.5px; line-height: 1.7; }
+.prose p { margin: 0 0 14px; }
+.prose ul { margin: 0 0 14px; padding-left: 20px; }
+.prose li { margin-bottom: 7px; }
+.prose strong { color: var(--ink); }
+.prose a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: var(--bull); }
+.prose code {
+  font-family: var(--mono); font-size: 12.5px; color: var(--ink);
+  background: var(--surface-2); padding: 2px 6px; border-radius: 5px;
+}
+
+/* --------------------------------------------------------------- report --- */
+.report { margin-top: 28px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.report-toggle {
+  padding: 0; background: none; border: 0; cursor: pointer;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-4);
+  transition: color .2s var(--ease);
+}
+.report-toggle:hover { color: var(--bear); }
+.report-status { font-size: 13px; color: var(--ink-3); }
+.report-form { display: flex; gap: 8px; width: 100%; max-width: 520px; }
+.report-form input { flex: 1; padding: 9px 12px; font-size: 13.5px; }
+.report-form .btn { padding: 9px 16px; font-size: 13px; }
