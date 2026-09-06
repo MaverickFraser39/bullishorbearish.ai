@@ -77,6 +77,10 @@ cursor spotlight and the counting figures are ornament. Under
 `prefers-reduced-motion` every one is cut and the final state renders
 immediately — nothing is withheld.
 
+**Dark only, by choice.** There is no light theme and no toggle. The palette,
+the ground and the hairline system are built for one surface, and a mechanical
+inverse of them would be worse than not offering one.
+
 **Duplicates are the real enemy.** On a board anyone can post to, `OpenAI`,
 `Open AI` and `open-ai` become three cards splitting one company's votes. Every
 name is reduced to an alphanumeric key (`openai`) that decides identity, while a
